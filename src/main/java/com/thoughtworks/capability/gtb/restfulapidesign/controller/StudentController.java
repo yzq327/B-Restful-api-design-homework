@@ -1,6 +1,7 @@
 package com.thoughtworks.capability.gtb.restfulapidesign.controller;
 
 import com.thoughtworks.capability.gtb.restfulapidesign.domain.Student;
+import com.thoughtworks.capability.gtb.restfulapidesign.po.StudentPo;
 import com.thoughtworks.capability.gtb.restfulapidesign.service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -17,24 +18,31 @@ public class StudentController {
     public  StudentController(StudentService studentService){
         this.studentService = studentService;
     }
+
     @PostMapping(value = "/students")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createUser(@RequestBody Student student) {
-        studentService.createStudent(student);
+    public void createUser(@RequestBody StudentPo studentPo) {
+        studentService.createStudent(studentPo);
     }
 
-    //    @GetMapping(value = "/login")
-//    public User getUser(@RequestParam Map<String,String> allParams) {
-//        return userService.getUser(allParams);
-//    }
     @GetMapping(value = "/students")
-    public List<Student> getStudents(){
-        return studentService.getStudents();
+    public List<Student> getStudents(@RequestParam(required = false) String gender){
+        return studentService.getStudents(gender);
     }
 
-    @GetMapping(value = "/students/{id}")
-    public Student getStudentById(@PathVariable("id") Integer id) throws ClassNotFoundException {
-        return studentService.getStudentById(id);
+    @GetMapping(value = "/students/{name}")
+    public Student getStudentByName(@PathVariable("name") String name) throws ClassNotFoundException {
+        return studentService.getStudentByName(name);
+    }
+
+    @DeleteMapping(value = "/students/{id}")
+    public void deleteStudentById(@PathVariable("id") Integer id) throws ClassNotFoundException {
+        studentService.deleteStudentById(id);
+    }
+
+    @PatchMapping(value = "/students/{id}")
+    public Student updateStudentById(@PathVariable("id") Integer id, @RequestBody StudentPo studentPo) throws ClassNotFoundException {
+        return studentService.updateStudentById(id, studentPo);
     }
 
 }

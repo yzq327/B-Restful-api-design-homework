@@ -1,40 +1,105 @@
 package com.thoughtworks.capability.gtb.restfulapidesign.service;
 
 import com.thoughtworks.capability.gtb.restfulapidesign.domain.Student;
+import com.thoughtworks.capability.gtb.restfulapidesign.po.StudentPo;
+import com.thoughtworks.capability.gtb.restfulapidesign.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class StudentService {
-    private Map<Integer, Student> studentMap = new HashMap<>();
 
-    public StudentService() {
-        studentMap.put(1, new Student(1, "yangzhengqing", "femail", "可可爱爱"));
-        studentMap.put(2, new Student(2, "hhhhhhhhh", "mail", "乖乖巧巧"));
+    public final StudentRepository studentRepository;
+
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
     }
 
-    public void createStudent(Student student) {
-        studentMap.put(student.getId(), student);
+    public void createStudent(StudentPo studentPo) {
+        Student student = Student.builder().id(9)
+                                .name(studentPo.getName())
+                                .gender(studentPo.getGender())
+                                .note(studentPo.getNote()).build();
+        studentRepository.createStudent(student);
     }
 
-    public List<Student> getStudents() {
-        List<Student> studentList = new ArrayList<>();
-        for(int i=0; i< studentMap.size(); i++){
-            studentList.add(studentMap.get(i));
+    public List<Student> getStudents(String gender) {
+        List<Student> studentList = studentRepository.getStudents();
+        if(gender != null) {
+            Iterator<Student> iter = studentList.iterator();
+            List<Student> students = new ArrayList<>();
+            while (iter.hasNext()) {
+                Student student = iter.next();
+                if(student.getGender().equals(gender)){
+                    students.add(student);
+                }
+            }
+            return students;
         }
         return studentList;
     }
 
-    public Student getStudentById(Integer id) throws ClassNotFoundException {
-        Student student = studentMap.get(id);
-        if(student == null) {
-            throw new ClassNotFoundException();
+    public Student getStudentByName(String name) throws ClassNotFoundException {
+        List<Student> studentList = studentRepository.getStudents();
+        Iterator<Student> iter = studentList.iterator();
+        List<Student> students = new ArrayList<>();
+        while (iter.hasNext()) {
+            Student student = iter.next();
+            if(student.getName().equals(name)){
+                students.add(student);
+            }
         }
-        return student;
+        if(students.size() == 0){
+           throw  new ClassNotFoundException("用户不存在");
+        }
+        return  students.get(0);
     }
+
+    public void deleteStudentById(Integer id) throws ClassNotFoundException {
+        List<Student> studentList = studentRepository.getStudents();
+        Iterator<Student> iter = studentList.iterator();
+        List<Student> students = new ArrayList<>();
+        while (iter.hasNext()) {
+            Student student = iter.next();
+            if(student.getId() == id){
+                students.add(student);
+            }
+        }
+        if(students.size() == 0){
+            throw  new ClassNotFoundException("用户Id不存在");
+        }
+        studentRepository.deleteStudent(id);
+    }
+
+    public Student updateStudentById(Integer id, StudentPo studentPo) throws ClassNotFoundException {
+        List<Student> studentList = studentRepository.getStudents();
+        Iterator<Student> iter = studentList.iterator();
+        List<Student> students = new ArrayList<>();
+        while (iter.hasNext()) {
+            Student student = iter.next();
+            if(student.getId() == id){
+                students.add(student);
+            }
+        }
+        if(students.size() == 0){
+            throw  new ClassNotFoundException("用户Id不存在");
+        }
+        Student updateStudent = students.get(0);
+        if(studentPo.getName() != null){
+            updateStudent.setName(studentPo.getName());
+        }
+        if(studentPo.getGender() != null){
+            updateStudent.setGender(studentPo.getGender());
+        }
+        if(studentPo.getNote() != null){
+            updateStudent.setNote(studentPo.getNote());
+        }
+        return updateStudent;
+
+
+
+    }
+
 }
