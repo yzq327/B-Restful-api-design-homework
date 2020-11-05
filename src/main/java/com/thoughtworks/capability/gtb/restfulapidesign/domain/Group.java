@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class group {
+public class Group {
     private  Integer id;
     private  String name;
     private  String note;
